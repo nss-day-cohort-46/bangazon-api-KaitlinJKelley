@@ -50,21 +50,21 @@ class Product(SafeDeleteModel):
     def can_be_rated(self, value):
         self.__can_be_rated = value
 
-    @property
-    def average_rating(self):
-        """Average rating calculated attribute for each product
+    # @property
+    # def average_rating(self):
+    #     """Average rating calculated attribute for each product
 
-        Returns:
-            number -- The average rating for the product
-        """
-        ratings = ProductRating.objects.filter(product=self)
-        total_rating = 0
-        for rating in ratings:
-            total_rating += rating.rating
+    #     Returns:
+    #         number -- The average rating for the product
+    #     """
+    #     ratings = ProductRating.objects.filter(product=self)
+    #     total_rating = 0
+    #     for rating in ratings:
+    #         total_rating += rating.rating
 
-        avg = total_rating / len(ratings)
-        return avg
+    #     avg = total_rating / len(ratings)
+    #     return avg
 
-    class Meta:
-        verbose_name = ("product")
-        verbose_name_plural = ("products")
+    # class Meta:
+    #     verbose_name = ("product")
+    #     verbose_name_plural = ("products")
