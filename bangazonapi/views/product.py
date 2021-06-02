@@ -11,6 +11,7 @@ from rest_framework import status
 from bangazonapi.models import Product, Customer, ProductCategory
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.core.exceptions import ValidationError
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -102,6 +103,12 @@ class Products(ViewSet):
             data = ContentFile(base64.b64decode(imgstr), name=f'{new_product.id}-{request.data["name"]}.{ext}')
 
             new_product.image_path = data
+
+        try:
+            new_product.full_clean()
+
+        except ValidationError:
+            return Response({"Price must be greater than 0.00 and less than 17,500.00"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         new_product.save()
 
