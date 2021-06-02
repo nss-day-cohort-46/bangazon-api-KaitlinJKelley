@@ -1,4 +1,5 @@
 """View module for handling requests about products"""
+from django.http.response import JsonResponse, HttpResponse
 from rest_framework.decorators import action
 from bangazonapi.models.recommendation import Recommendation
 import base64
@@ -12,6 +13,7 @@ from bangazonapi.models import Product, Customer, ProductCategory
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.exceptions import ValidationError
+import json
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -108,7 +110,7 @@ class Products(ViewSet):
             new_product.full_clean()
 
         except ValidationError:
-            return Response({"Price must be greater than 0.00 and less than 17,500.00"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({"Something in your post body isn't right"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         new_product.save()
 
