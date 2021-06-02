@@ -109,8 +109,9 @@ class Products(ViewSet):
         try:
             new_product.full_clean()
 
-        except ValidationError:
-            return Response({"Something in your post body isn't right"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        except ValidationError as ex:
+            # full stack trace of error message
+            return Response({"error": ex.args[0]}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         new_product.save()
 
