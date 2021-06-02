@@ -1,4 +1,5 @@
 """View module for handling requests about products"""
+from django.http.response import JsonResponse, HttpResponse
 from rest_framework.decorators import action
 from bangazonapi.models.recommendation import Recommendation
 import base64
@@ -11,6 +12,8 @@ from rest_framework import status
 from bangazonapi.models import Product, Customer, ProductCategory
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.core.exceptions import ValidationError
+import json
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -102,6 +105,13 @@ class Products(ViewSet):
             data = ContentFile(base64.b64decode(imgstr), name=f'{new_product.id}-{request.data["name"]}.{ext}')
 
             new_product.image_path = data
+
+        try:
+            new_product.full_clean()
+
+        except ValidationError as ex:
+            # full stack trace of error message
+            return Response({"error": ex.args[0]}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         new_product.save()
 
