@@ -1,13 +1,7 @@
-from django.conf.urls import url, include
+from bangazonreports.views import get_inexpensive_products
 from django.urls import path
-from django.conf.urls.static import static
-from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
-from bangazonapi.models import *
-from bangazonapi.views import *
-
-router = routers.DefaultRouter(trailing_slash=False)
 
 urlpatterns = [
-    path('^', include(router.urls))
+    path('inexpensive_products', get_inexpensive_products)
 ]
