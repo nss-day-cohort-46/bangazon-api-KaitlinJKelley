@@ -1,6 +1,7 @@
 import json
 from rest_framework import status
 from rest_framework.test import APITestCase
+import os.path
 
 
 class OrderTests(APITestCase):
@@ -27,8 +28,15 @@ class OrderTests(APITestCase):
         data = { "name": "Kite", "price": 14.99, "quantity": 60, "description": "It flies high", "category_id": 1, "location": "Pittsburgh" }
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
         response = self.client.post(url, data, format='json')
+        self.product = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+        #Create a paymenttype
+        url = "/paymenttypes"
+        self.payment_data = {"merchant_name": "American Express", "account_number": "111-1111-1111", "create_date": "2021-04-09", 
+                "expiration_date": "2022-07-05" }
+        response = self.client.post(url, self.payment_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_add_product_to_order(self):
         """
@@ -80,5 +88,21 @@ class OrderTests(APITestCase):
         self.assertEqual(len(json_response["lineitems"]), 0)
 
     # TODO: Complete order by adding payment type
+    def test_order_payment_type(self):
+        self.test_add_product_to_order()
+
+        url = "/orders/1"
+        data = {"payment_type": 1}
+
+        response = self.client.put(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.get("/orders/1", format="json")
+        json_response = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        payment_type = os.path.split(json_response["payment_type"])
+        self.assertEqual(int(payment_type[1]), data["payment_type"])
+        
 
     # TODO: New line item is not added to closed order
