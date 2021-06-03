@@ -1,6 +1,7 @@
 import json
 from rest_framework import status
 from rest_framework.test import APITestCase
+import os.path
 
 
 class OrderTests(APITestCase):
@@ -90,20 +91,18 @@ class OrderTests(APITestCase):
     def test_order_payment_type(self):
         self.test_add_product_to_order()
 
-        url = "/cart/1"
-        data = {"paymenttype": 1}
+        url = "/orders/1"
+        data = {"payment_type": 1}
 
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        response = self.client.get(url, format="json")
+        response = self.client.get("/orders/1", format="json")
         json_response = json.loads(response.content)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        self.assertEqual(json_response["merchant_name"], self.payment_data["merchant_name"])
-        self.assertEqual(json_response["account_number"], self.payment_data["account_number"])
-        self.assertEqual(json_response["create_date"], self.payment_data["create_date"])
-        self.assertEqual(json_response["expiration_date"], self.payment_data["expiration_date"])
+        payment_type = os.path.split(json_response["payment_type"])
+        self.assertEqual(int(payment_type[1]), data["payment_type"])
         
 
     # TODO: New line item is not added to closed order
