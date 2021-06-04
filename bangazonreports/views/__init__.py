@@ -1,2 +1,4 @@
 from .inexpensive_products import get_inexpensive_products
 from .expensive_products import get_expensive_products
+from .completed_orders import get_completed_orders
+from .connection import Connection
