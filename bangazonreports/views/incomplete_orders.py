@@ -2,7 +2,7 @@ from bangazonreports.views.connection import Connection
 import sqlite3
 from django.shortcuts import render
 
-def get_completed_orders(request):
+def get_incomplete_orders(request):
     with sqlite3.connect(Connection.db_path) as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
@@ -11,15 +11,13 @@ def get_completed_orders(request):
         Select 
             o.id,
             u.first_name || " " || u.last_name as customer,
-            sum(p.price) as total,
-            pt.merchant_name as payment
+            sum(p.price) as total
         From bangazonapi_Order o
         Join bangazonapi_Customer c On c.id = o.customer_id
         Join auth_user u On u.id = c.user_id
         Join bangazonapi_OrderProduct op On op.order_id = o.id
         Join bangazonapi_Product p On p.id = op.product_id
-        Join bangazonapi_Payment pt On pt.id = o.payment_type_id
-        Where payment_type_id Is Not Null
+        Where payment_type_id Is Null
         Group By customer
         """)        
 
@@ -31,13 +29,12 @@ def get_completed_orders(request):
             order = {
                 "id": row["id"],
                 "customer": row["customer"],
-                "total": row["total"],
-                "payment": row["payment"]
+                "total": row["total"]
             }
 
             order_list.append(order)
         
-        template = "orders/completed_orders.html"
+        template = "orders/incomplete_orders.html"
         context = {
             "order_list": order_list
         }
