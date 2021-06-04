@@ -61,7 +61,6 @@ class OrderTests(APITestCase):
         self.assertEqual(json_response["size"], 1)
         self.assertEqual(len(json_response["lineitems"]), 1)
 
-
     def test_remove_product_from_order(self):
         """
         Ensure we can remove a product from an order.
@@ -87,7 +86,6 @@ class OrderTests(APITestCase):
         self.assertEqual(json_response["size"], 0)
         self.assertEqual(len(json_response["lineitems"]), 0)
 
-    # TODO: Complete order by adding payment type
     def test_order_payment_type(self):
         self.test_add_product_to_order()
 
@@ -104,5 +102,28 @@ class OrderTests(APITestCase):
         payment_type = os.path.split(json_response["payment_type"])
         self.assertEqual(int(payment_type[1]), data["payment_type"])
         
+    def test_line_item_added_to_open_order(self):
 
-    # TODO: New line item is not added to closed order
+        # Adds and closes an order
+        self.test_order_payment_type()
+
+        # Opens 2nd order
+        url = "/cart"
+        data = { "product_id": 1 }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Add 2nd item to open order through other route
+        url = "/profile/cart"
+        data = { "product_id": 1 }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Get open order
+        response = self.client.get("/cart", format="json")
+        json_response = json.loads(response.content)
+
+        self.assertEqual(json_response["id"], 2)
+        self.assertEqual(len(json_response["lineitems"]), 2)
