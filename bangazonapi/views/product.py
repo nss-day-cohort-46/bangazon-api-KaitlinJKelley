@@ -1,4 +1,5 @@
 """View module for handling requests about products"""
+from os import stat
 from django.http.response import JsonResponse, HttpResponse
 from rest_framework.decorators import action
 from bangazonapi.models.recommendation import Recommendation
@@ -310,3 +311,33 @@ class Products(ViewSet):
             return Response(None, status=status.HTTP_204_NO_CONTENT)
 
         return Response(None, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    @action(methods=['post', 'delete'], detail=True)
+    def like(self, request, pk):
+        customer = Customer.objects.get(user=request.auth.user)
+        product = Product.objects.get(pk=pk)
+        if request.method == "POST":
+
+            product.liked.set([customer])
+
+            return Response({}, status=status.HTTP_201_CREATED)
+
+        if request.method == "DELETE":
+            product.liked.remove(customer)
+
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=False)
+    def liked(self, request):
+        customer = Customer.objects.get(user=request.auth.user)
+        products = Product.objects.filter(liked__customer__customer=customer) 
+
+        serializer = ProductSerializer(products, many=True, context={'request': request})
+
+        product_names = []
+        
+        for product in serializer.data:
+            product_names.append(product["name"])
+
+        return Response(product_names)       
+
