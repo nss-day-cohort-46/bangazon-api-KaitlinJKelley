@@ -337,7 +337,7 @@ class Products(ViewSet):
         product_names = []
         
         for product in serializer.data:
-            product_names.append(product["name"])
+            product_names.append({"id": product["id"], "name": product["name"]})
 
         return Response(product_names)       
 
